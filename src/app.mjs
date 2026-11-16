@@ -9,7 +9,7 @@ let accepted=null,pending=null,currentReport=null,page=0,fileToken=0,readControl
 function reading(active){$('readStatus').hidden=!active;$('cancelRead').hidden=!active;$('importPanel').setAttribute('aria-busy',String(active));}
 function clearPending(){pending=null;$('confirmImport').disabled=true;$('mapping').innerHTML='';$('preview').innerHTML='';}
 function stopReading(){readController?.abort();readController=null;reading(false);}
-$('cancelRead').onclick=()=>{++fileToken;stopReading();clearPending();diagnostics([]);notice('Чтение отменено. Прежние данные и экспорт доступны.');};
+$('cancelRead').onclick=()=>{++fileToken;stopReading();clearPending();$('file').value='';diagnostics([]);notice('Чтение отменено. Прежние данные и экспорт доступны.');};
 function notice(message,type=''){ $('notice').textContent=message;$('notice').className='notice '+type; }
 function showImport(){ $('importPanel').hidden=false;$('importPanel').scrollIntoView({behavior:'smooth',block:'start'}); }
 for(const id of ['openImport','uploadButton','showImport'])$(id).addEventListener('click',showImport);
