@@ -1,0 +1,8 @@
+import fs from 'node:fs/promises';
+await fs.rm('dist', {recursive:true,force:true});
+await fs.mkdir('dist', {recursive:true});
+await fs.cp('public','dist',{recursive:true});
+await fs.cp('src','dist/src',{recursive:true});
+await fs.copyFile('index.html','dist/index.html');
+await fs.writeFile('dist/.nojekyll','');
+console.log('Built dist/ (all asset paths relative)');

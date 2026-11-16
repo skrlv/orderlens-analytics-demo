@@ -1,0 +1,66 @@
+{
+  "provenance": "Вымышленные данные. Ручной контрольный пример задачи №18, 16 ноября 2026. Никаких реальных заказов.",
+  "mode": "parts",
+  "inputRows": 15,
+  "duplicateRows": 1,
+  "uniqueParts": 14,
+  "events": 13,
+  "cases": [
+    {
+      "from": "2026-01-01",
+      "to": "2026-01-31",
+      "currency": "RUB",
+      "gross": "2200.00",
+      "refunds": "200.00",
+      "net": "2000.00",
+      "orders": 3,
+      "aov": "733.33",
+      "eligibleOrders": 3,
+      "customers": 2,
+      "repeatCustomers": 1,
+      "repeatBasisPoints": 5000
+    },
+    {
+      "from": "2026-02-01",
+      "to": "2026-02-28",
+      "currency": "RUB",
+      "gross": "1000.00",
+      "refunds": "1500.00",
+      "net": "-500.00",
+      "orders": 4,
+      "aov": "250.00",
+      "eligibleOrders": 3,
+      "customers": 2,
+      "repeatCustomers": 1,
+      "repeatBasisPoints": 5000
+    },
+    {
+      "from": "2026-01-01",
+      "to": "2026-02-28",
+      "currency": "RUB",
+      "gross": "3200.00",
+      "refunds": "1700.00",
+      "net": "1500.00",
+      "orders": 7,
+      "aov": "457.14",
+      "eligibleOrders": 5,
+      "customers": 3,
+      "repeatCustomers": 1,
+      "repeatBasisPoints": 3333
+    },
+    {
+      "from": "2026-02-01",
+      "to": "2026-02-28",
+      "currency": "USD",
+      "gross": "50.00",
+      "refunds": "0.00",
+      "net": "50.00",
+      "orders": 1,
+      "aov": "50.00",
+      "eligibleOrders": 1,
+      "customers": 1,
+      "repeatCustomers": 0,
+      "repeatBasisPoints": 0
+    }
+  ]
+}
