@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Orderlens — локальная аналитика заказов из CSV и Excel. Проверка таблиц, оплаты, возвраты и повторные покупки.">
   <meta name="theme-color" content="#172a44"><title>Orderlens — аналитика заказов</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
   <link rel="icon" href="./mark.svg" type="image/svg+xml"><link rel="stylesheet" href="./src/style.css">
   <script src="./vendor/xlsx.full.min.js" defer></script><script type="module" src="./src/app.mjs"></script>
 </head>
@@ -26,6 +26,7 @@
       <div class="sectionhead"><div><span class="step">01 / ИМПОРТ</span><h2 id="importTitle">Сначала проверим данные</h2></div><button id="closeImport" class="quiet">Свернуть ↑</button></div>
       <p class="muted">CSV в UTF-8 или XLSX, до 5 МБ и 10 000 строк. Выберите файл, проверьте колонки и подтвердите импорт. Принятые данные заменяются целиком.</p>
       <div class="filearea"><label for="file"><strong>Выберите таблицу заказов</strong><span>CSV / XLSX • только в этой вкладке</span></label><input id="file" type="file" accept=".csv,.xlsx"></div>
+      <div id="readStatus" class="notice" role="status" hidden>Читаем Excel… Прежний отчёт и экспорт доступны. Предел чтения — 5 секунд.</div><button id="cancelRead" class="secondary" hidden>Отменить чтение</button>
       <div class="importsettings"><label>Разделитель CSV<select id="delimiter"><option value=",">Запятая (,)</option><option value=";">Точка с запятой (;)</option><option value="tab">Табуляция</option></select></label><label>Дробная часть<select id="decimal"><option value=".">Точка: 1000.50</option><option value=",">Запятая: 1000,50</option></select></label><label>Лист<select id="sheet" disabled><option>CSV</option></select></label><label>Строка заголовков<input id="headerRow" type="number" min="1" max="100" value="1"></label><label class="modefield">Что означает строка<select id="mode"><option value="">Выберите режим…</option><option value="event">Событие целиком</option><option value="parts">Часть события (нужен line_id)</option></select></label></div>
       <div class="contract-note">Сумма строки = фактически оплаченная часть события после скидок. Повтор общего итога заказа в каждой товарной строке не поддерживается. Для такого файла сначала оставьте одну строку на событие.</div>
       <div id="mapping"></div><div id="preview"></div>

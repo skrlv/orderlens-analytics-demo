@@ -1,13 +1,14 @@
 {
   "name": "orderlens-analytics-demo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "build": "node scripts/build.mjs",
     "start": "node scripts/serve.mjs",
-    "test:browser": "node tests/browser.mjs"
+    "test:browser": "node tests/browser.mjs",
+    "test:xlsx-browser": "node tests/xlsx-browser.mjs"
   },
   "devDependencies": {
     "playwright": "1.65.1"

@@ -1,10 +1,15 @@
 import {FIELDS,validateRows,compute,money} from './engine.mjs';
-import {parseCSV,readWorkbook,workbookGrid,headersAt,mapRows} from './import.mjs';
+import {parseCSV,workbookGrid,headersAt,mapRows} from './import.mjs';
+import {readWorkbookAsync} from './xlsx-reader.mjs';
 import {csvReport,jsonReport} from './export.mjs';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cash=(v,currency)=>money(v).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+' '+({RUB:'₽',USD:'$',EUR:'€'}[currency]||currency);
-let accepted=null,pending=null,currentReport=null,page=0,fileToken=0;
+let accepted=null,pending=null,currentReport=null,page=0,fileToken=0,readController=null;
+function reading(active){$('readStatus').hidden=!active;$('cancelRead').hidden=!active;$('importPanel').setAttribute('aria-busy',String(active));}
+function clearPending(){pending=null;$('confirmImport').disabled=true;$('mapping').innerHTML='';$('preview').innerHTML='';}
+function stopReading(){readController?.abort();readController=null;reading(false);}
+$('cancelRead').onclick=()=>{++fileToken;stopReading();clearPending();diagnostics([]);notice('Чтение отменено. Прежние данные и экспорт доступны.');};
 function notice(message,type=''){ $('notice').textContent=message;$('notice').className='notice '+type; }
 function showImport(){ $('importPanel').hidden=false;$('importPanel').scrollIntoView({behavior:'smooth',block:'start'}); }
 for(const id of ['openImport','uploadButton','showImport'])$(id).addEventListener('click',showImport);
@@ -32,18 +37,23 @@ function prepare(){
 }
 $('file').addEventListener('change',async()=>{
   const file=$('file').files[0];if(!file)return;const token=++fileToken;
-  $('confirmImport').disabled=true;pending=null;
+  stopReading();clearPending();diagnostics([]);
+  const controller=new AbortController();readController=controller;
   try{
     if(file.size>5*1024*1024)throw Error('Файл больше 5 МБ. Разделите выгрузку.');
     if(!/\.(csv|xlsx)$/i.test(file.name))throw Error('Поддерживаются только CSV и XLSX.');
-    const buffer=await file.arrayBuffer();if(token!==fileToken)return;
     const isXlsx=/\.xlsx$/i.test(file.name);
-    pending={name:file.name,demo:false,...(isXlsx?{book:readWorkbook(buffer,globalThis.XLSX)}:{text:new TextDecoder('utf-8',{fatal:true}).decode(buffer)})};
+    if(isXlsx){reading(true);notice('Читаем Excel отдельно от интерфейса. Прежний отчёт и экспорт доступны; чтение можно отменить.');}
+    const buffer=await file.arrayBuffer();if(token!==fileToken)return;
+    const content=isXlsx?{book:await readWorkbookAsync(buffer,{signal:controller.signal})}:{text:new TextDecoder('utf-8',{fatal:true}).decode(buffer)};
+    if(token!==fileToken)return;
+    pending={name:file.name,demo:false,...content};
     $('mode').value='';$('headerRow').value='1';
     if(isXlsx){$('sheet').disabled=false;$('sheet').innerHTML=pending.book.SheetNames.map(n=>`<option>${esc(n)}</option>`).join('');}
     else{$('sheet').disabled=true;$('sheet').innerHTML='<option>CSV</option>';}
     prepare();
-  }catch(e){pending=null;$('mapping').innerHTML='';$('preview').innerHTML='';diagnostics([{severity:'error',code:'FILE',sheet:'—',row:'—',field:'файл',message:e.message}]);notice('Новый файл не принят. Ранее принятые данные сохранены.','error');}
+  }catch(e){if(token!==fileToken)return;clearPending();diagnostics([{severity:'error',code:'FILE',sheet:'—',row:'—',field:'файл',message:e.message}]);notice('Новый файл не принят. Ранее принятые данные и экспорт доступны.','error');}
+  finally{if(token===fileToken){readController=null;reading(false);}}
 });
 for(const id of ['delimiter','sheet','headerRow'])$(id).addEventListener('change',prepare);
 function importPending(){
@@ -67,6 +77,7 @@ function importPending(){
 $('confirmImport').onclick=importPending;
 async function demo(initial=false){
   const token=++fileToken;
+  stopReading();clearPending();
   try{$('file').value='';const response=await fetch('./samples/orders-parts.csv');if(!response.ok)throw Error('Не удалось прочитать контрольный файл.');const text=await response.text();if(token!==fileToken)return;pending={name:'orders-parts.csv',text,demo:true};$('delimiter').value=',';$('decimal').value='.';$('headerRow').value='1';$('sheet').innerHTML='<option>CSV</option>';$('sheet').disabled=true;prepare();$('mode').value='parts';if(importPending()){$('from').value='2026-01-01';$('to').value='2026-02-28';render();if(initial)$('importPanel').hidden=true;}}catch(e){if(token===fileToken)notice(e.message,'error');}
 }
 $('loadDemo').onclick=()=>demo();

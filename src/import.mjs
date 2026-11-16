@@ -1,3 +1,4 @@
+import {validateXlsxContainer} from './xlsx-container.mjs';
 export const MAX_ROWS=10000;
 export function parseCSV(text,delimiter=',') {
   if(![',',';','\t'].includes(delimiter)) throw Error('Выберите разделитель CSV.');
@@ -19,7 +20,8 @@ export function parseCSV(text,delimiter=',') {
   if(rows.some(r=>r.length>64))throw Error('Лимит: 64 колонки.');
   return rows;
 }
-export function readWorkbook(buffer,XLSX){const bytes=new Uint8Array(buffer);if(bytes[0]!==0x50||bytes[1]!==0x4b||bytes[2]!==3||bytes[3]!==4)throw Error('Файл не является книгой XLSX (ZIP / OOXML).');return XLSX.read(buffer,{type:'array',cellFormula:true,cellNF:true,cellText:true,cellDates:false,bookVBA:false});}
+/** Synchronous low-level read. The app invokes this only inside xlsx-worker.js. */
+export function readWorkbook(buffer,XLSX){validateXlsxContainer(buffer);return XLSX.read(buffer,{type:'array',cellFormula:true,cellNF:true,cellText:true,cellDates:false,bookVBA:false});}
 export function workbookGrid(book,name,XLSX){
   const sheet=book.Sheets[name]; if(!sheet?.['!ref'])throw Error('На выбранном листе нет ячеек.');
   const range=XLSX.utils.decode_range(sheet['!ref']);
